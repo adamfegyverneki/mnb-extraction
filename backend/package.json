@@ -1,0 +1,35 @@
+{
+  "name": "mnb-extraction-backend",
+  "version": "1.0.0",
+  "description": "MNB exchange rates microservice backend",
+  "main": "handlers/health.js",
+  "scripts": {
+    "test": "jest",
+    "test:sequential": "jest --runInBand",
+    "typecheck": "tsc --noEmit --pretty false",
+    "verify": "npm run typecheck && MONGODB_URI=mongodb://localhost:27017/app HEALTH_TOKEN=verify-placeholder VERIFY_ALLOW_PLACEHOLDER_ENV=1 npm run build",
+    "prepare:runtime-env": "node scripts/generate-runtime-env.js",
+    "dev": "npm run prepare:runtime-env && serverless offline --httpPort ${BACKEND_HTTP_PORT:-4000} --lambdaPort ${BACKEND_LAMBDA_PORT:-3002}",
+    "build": "npm run prepare:runtime-env && serverless package",
+    "deploy": "node scripts/mergeServerlessStageEnv.js --stage prod && KRATOS_RUNTIME_ENV_SOURCE=.env.prod KRATOS_MERGED_ENV_PATH=.env.prod npm run prepare:runtime-env && KRATOS_MERGED_ENV_PATH=.env.prod node scripts/assert-serverless-stage-env.js --stage prod && serverless deploy --stage prod --region eu-central-1",
+    "deploy:staging": "node scripts/mergeServerlessStageEnv.js --stage staging && KRATOS_RUNTIME_ENV_SOURCE=.env.staging KRATOS_MERGED_ENV_PATH=.env.staging npm run prepare:runtime-env && KRATOS_MERGED_ENV_PATH=.env.staging node scripts/assert-serverless-stage-env.js --stage staging && serverless deploy --stage staging --region eu-central-1",
+    "remove": "serverless remove",
+    "logs": "serverless logs -f",
+    "invoke": "serverless invoke -f"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "fast-xml-parser": "^5.9.3",
+    "mongodb": "^6.3.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.25.0",
+    "jest": "^29.7.0",
+    "serverless": "^3.39.0",
+    "serverless-esbuild": "^1.54.3",
+    "serverless-offline": "^13.8.1",
+    "typescript": "^5.7.2"
+  }
+}

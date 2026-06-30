@@ -1,0 +1,17 @@
+node_modules/
+.tools/
+dist/
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/.env.prod
+backend/.env.staging
+backend/.env.runtime
+infra/node_modules/
+infra/.sst/
+infra/.build/
+data/
+*.log
+.pids/
+frontend/.env_prod
+.env

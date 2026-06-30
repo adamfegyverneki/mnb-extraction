@@ -1,0 +1,26 @@
+{
+  "name": "mnb-extract",
+  "version": "1.0.0",
+  "description": "Daily MNB exchange rates microservice for Hungary's top 30 trade currencies (HUF reference)",
+  "private": true,
+  "scripts": {
+    "fetch": "tsx src/index.ts fetch",
+    "list": "tsx src/index.ts list",
+    "build": "cd backend && npm run build",
+    "verify": "./scripts/dev.sh verify backend",
+    "deploy-be": "./scripts/dev.sh deploy-be",
+    "post-deploy": "./scripts/dev.sh post-deploy"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "commander": "^15.0.0",
+    "fast-xml-parser": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}

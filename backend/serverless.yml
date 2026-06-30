@@ -1,0 +1,116 @@
+service: mnb-extraction
+
+frameworkVersion: '3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-central-1
+  stage: ${opt:stage, 'dev'}
+  endpointType: REGIONAL
+  deploymentBucket:
+    name: ${env:SERVERLESS_DEPLOYMENT_BUCKET, 'serverless-offline-local'}
+  environment:
+    DOTENV_CONFIG_PATH: .env.runtime
+    NODE_ENV: ${self:custom.nodeEnv.${self:provider.stage}, 'development'}
+    CORS_ORIGIN: ${env:FRONTEND_ORIGIN, '*'}
+    MONGODB_URI: ${env:MONGODB_URI}
+    MONGODB_DB_NAME: ${env:MONGODB_DB_NAME, 'app'}
+    HEALTH_TOKEN: ${env:HEALTH_TOKEN, ''}
+    APP_VERSION: ${env:APP_VERSION, 'unknown'}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: '*'
+
+plugins:
+  - serverless-offline
+  - serverless-esbuild
+
+custom:
+  corsOrigin: ${env:FRONTEND_ORIGIN, '*'}
+  corsStdHeaders: &corsStd
+    - Content-Type
+    - Authorization
+    - X-Health-Token
+  corsHealthHeaders: &corsHealth
+    - Content-Type
+    - Authorization
+    - X-Health-Token
+  nodeEnv:
+    dev: development
+    staging: production
+    prod: production
+  esbuild:
+    bundle: true
+    minify: true
+    sourcemap: false
+    exclude:
+      - aws-sdk
+    target: node20
+    platform: node
+    concurrency: 10
+  serverless-offline:
+    httpPort: ${env:BACKEND_HTTP_PORT, 4000}
+    lambdaPort: ${env:BACKEND_LAMBDA_PORT, 3002}
+    lambdaTimeout: 30
+    noPrependStageInUrl: true
+
+functions:
+  health:
+    handler: handlers/health.health
+    events:
+      - http:
+          path: /api/health
+          method: get
+          cors:
+            origin: ${self:custom.corsOrigin}
+            allowCredentials: true
+            headers: *corsHealth
+
+  ratesLatest:
+    handler: handlers/rates.ratesLatest
+    events:
+      - http:
+          path: /api/rates/latest
+          method: get
+          cors:
+            origin: ${self:custom.corsOrigin}
+            allowCredentials: true
+            headers: *corsStd
+
+  ratesByDate:
+    handler: handlers/rates.ratesByDate
+    events:
+      - http:
+          path: /api/rates/{date}
+          method: get
+          cors:
+            origin: ${self:custom.corsOrigin}
+            allowCredentials: true
+            headers: *corsStd
+
+  ratesList:
+    handler: handlers/rates.ratesList
+    events:
+      - http:
+          path: /api/rates
+          method: get
+          cors:
+            origin: ${self:custom.corsOrigin}
+            allowCredentials: true
+            headers: *corsStd
+
+  fetchDaily:
+    handler: handlers/fetchDaily.handler
+    timeout: 60
+    events:
+      - schedule:
+          rate: cron(0 11 ? * MON-FRI *)
+          enabled: true
+          description: Fetch MNB rates Mon-Fri; 11:00 UTC = 12:00 CET / 13:00 CEST
