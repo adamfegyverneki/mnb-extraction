@@ -1,0 +1,26 @@
+{
+  "name": "mnb-extract",
+  "version": "1.0.0",
+  "description": "Daily MNB exchange rates for Hungary's top 30 trade currencies (HUF reference)",
+  "type": "module",
+  "scripts": {
+    "fetch": "tsx src/index.ts fetch",
+    "schedule": "tsx src/index.ts schedule",
+    "list": "tsx src/index.ts list",
+    "build": "tsc"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "commander": "^15.0.0",
+    "fast-xml-parser": "^5.9.3",
+    "node-cron": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
